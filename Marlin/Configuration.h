@@ -78,10 +78,60 @@
 
 // @section info
 
+// Comment or uncomment definitions based on your printer or preferences.
+//#define WILSON_TYPE
+#define WILSON_II_TYPE
+
+// Z probes:
+//#define FIX_MOUNTED_PROBE
+//#define BLTOUCH
+#define Z_RACK_PINION
+//#define MJRICE_SERVO
+//#define SOLENOID_PROBE
+
+#define WILSON_DEFAULTS
+
+#if ENABLED(WILSON_DEFAULTS)
+  //#define MULTIPLE_PROBING 2            // The number of probes to perform at each point.
+  //#define PROBE_MANUALLY                // The "Manual Probe" provides a means to do "Auto" Bed Leveling without a probe. 
+  //#define AUTO_BED_LEVELING_3POINT      // Probe 3 points. The result is a single tilted plane. Best for a flat bed.
+  #define AUTO_BED_LEVELING_LINEAR      // Probe several points in a grid. The result is a single tilted plane. Best for a flat bed.
+  //#define AUTO_BED_LEVELING_BILINEAR    // Probe several points in a grid. The result is a mesh, best for large or uneven beds.
+  #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
+    #define ABL_BILINEAR_SUBDIVISION    // Synthesizes intermediate points to produce a more detailed mesh.
+  #endif
+  //#define AUTO_BED_LEVELING_UBL         // A comprehensive bed leveling system that combines features and benefits of other methods.
+  #if ENABLED(AUTO_BED_LEVELING_UBL)
+    #define RESTORE_LEVELING_AFTER_G28  // Enable this option to have G28 restore the prior leveling state. Required for UBL.
+  #endif
+  //#define MESH_BED_LEVELING             // A simplified method of compensating for an uneven bed.
+  #if ENABLED(MESH_BED_LEVELING) || ENABLED(PROBE_MANUALLY)
+    //#define LCD_BED_LEVELING            // Use the LCD controller for bed leveling.
+  #endif
+  #define EEPROM_SETTINGS
+  #define SDSUPPORT
+  #define REPRAP_DISCOUNT_SMART_CONTROLLER
+
+  #if ENABLED(Z_RACK_PINION)
+    #define Z_PROBE_OFFSET -11        // Always negative (below the nozzle).
+  #elif ENABLED(MJRICE_SERVO)
+    #define NUM_SERVOS 3
+    #define Z_ENDSTOP_SERVO_NR 2      // Servo index starts with 0 for M280 command
+    #define Z_SERVO_ANGLES {0,90}     // Z Servo Deploy and Stow angles
+    // sometimes the weight of the servo arm and the shaking of he extruder causes the servo to slowly descend during printing until it 
+    // interferes with the print. There are two things I could do.  The first one (not using) just keeps the servo attached all the time.
+    //#define DONT_DETACH_SERVOS      // Dont use this unless you're desperate. If you use this to keep the servos rigidly in place, make sure you are powering the servos from an adequate source (not the arduino 5V regulator)
+    // But this one seems to work nicely, it will just periodically put the servo back to where it is supposed to be:
+    #define PERIODICALLY_REFRESH_SERVO
+    #define SERVO_REFRESH_INTERVAL 10000 // ms
+    #define Z_PROBE_OFFSET -6         // Always negative (below the nozzle).
+  #endif
+#endif
+
 // User-specified version info of this build to display in [Pronterface, etc] terminal window during
 // startup. Implementation of an idea by Prof Braino to inform user that any changes made to this
 // build by the user have been successfully uploaded into firmware.
-#define STRING_CONFIG_H_AUTHOR "(none, default config)" // Who made the changes.
+#define STRING_CONFIG_H_AUTHOR "(mrice, J.Vance, Nathaniel Roark, default config)" // Who made the changes.
 #define SHOW_BOOTSCREEN
 #define STRING_SPLASH_LINE1 SHORT_BUILD_VERSION // will be shown during bootup in line 1
 #define STRING_SPLASH_LINE2 WEBSITE_URL         // will be shown during bootup in line 2
@@ -131,12 +181,14 @@
 // The following define selects which electronics board you have.
 // Please choose the name from boards.h that matches your setup
 #ifndef MOTHERBOARD
-  #define MOTHERBOARD BOARD_RAMPS_14_EFB
+  //#define MOTHERBOARD BOARD_RAMPS_14_EFB
+  //#define MOTHERBOARD BOARD_PICA_REVB	// For the older PICA (board revision is printed on the silkscreen of the PCB).
+  #define MOTHERBOARD BOARD_PICA
 #endif
 
 // Optional custom name for your RepStrap or other custom machine
 // Displayed in the LCD "Ready" message
-//#define CUSTOM_MACHINE_NAME "3D Printer"
+//#define CUSTOM_MACHINE_NAME "Wilson II"
 
 // Define this to set a unique identifier for this printer, (Used by some programs to differentiate between machines)
 // You can use an online service to generate a random UUID. (eg http://www.uuidgenerator.net/version4)
@@ -310,12 +362,12 @@
  *
  * :{ '0': "Not used", '1':"100k / 4.7k - EPCOS", '2':"200k / 4.7k - ATC Semitec 204GT-2", '3':"Mendel-parts / 4.7k", '4':"10k !! do not use for a hotend. Bad resolution at high temp. !!", '5':"100K / 4.7k - ATC Semitec 104GT-2 (Used in ParCan & J-Head)", '501':"100K Zonestar (Tronxy X3A)", '6':"100k / 4.7k EPCOS - Not as accurate as Table 1", '7':"100k / 4.7k Honeywell 135-104LAG-J01", '8':"100k / 4.7k 0603 SMD Vishay NTCS0603E3104FXT", '9':"100k / 4.7k GE Sensing AL03006-58.2K-97-G1", '10':"100k / 4.7k RS 198-961", '11':"100k / 4.7k beta 3950 1%", '12':"100k / 4.7k 0603 SMD Vishay NTCS0603E3104FXT (calibrated for Makibox hot bed)", '13':"100k Hisens 3950  1% up to 300°C for hotend 'Simple ONE ' & hotend 'All In ONE'", '20':"PT100 (Ultimainboard V2.x)", '51':"100k / 1k - EPCOS", '52':"200k / 1k - ATC Semitec 204GT-2", '55':"100k / 1k - ATC Semitec 104GT-2 (Used in ParCan & J-Head)", '60':"100k Maker's Tool Works Kapton Bed Thermistor beta=3950", '66':"Dyze Design 4.7M High Temperature thermistor", '70':"the 100K thermistor found in the bq Hephestos 2", '71':"100k / 4.7k Honeywell 135-104LAF-J01", '147':"Pt100 / 4.7k", '1047':"Pt1000 / 4.7k", '110':"Pt100 / 1k (non-standard)", '1010':"Pt1000 / 1k (non standard)", '-4':"Thermocouple + AD8495", '-3':"Thermocouple + MAX31855 (only for sensor 0)", '-2':"Thermocouple + MAX6675 (only for sensor 0)", '-1':"Thermocouple + AD595",'998':"Dummy 1", '999':"Dummy 2" }
  */
-#define TEMP_SENSOR_0 1
+#define TEMP_SENSOR_0 5
 #define TEMP_SENSOR_1 0
 #define TEMP_SENSOR_2 0
 #define TEMP_SENSOR_3 0
 #define TEMP_SENSOR_4 0
-#define TEMP_SENSOR_BED 0
+#define TEMP_SENSOR_BED 60
 #define TEMP_SENSOR_CHAMBER 0
 
 // Dummy thermistor constant temperature readings, for use with 998 and 999
@@ -350,12 +402,12 @@
 // When temperature exceeds max temp, your heater will be switched off.
 // This feature exists to protect your hotend from overheating accidentally, but *NOT* from thermistor short/failure!
 // You should use MINTEMP for thermistor short/failure protection.
-#define HEATER_0_MAXTEMP 275
+#define HEATER_0_MAXTEMP 255
 #define HEATER_1_MAXTEMP 275
 #define HEATER_2_MAXTEMP 275
 #define HEATER_3_MAXTEMP 275
 #define HEATER_4_MAXTEMP 275
-#define BED_MAXTEMP 150
+#define BED_MAXTEMP 140
 
 //===========================================================================
 //============================= PID Settings ================================
@@ -380,9 +432,9 @@
   // If you are using a pre-configured hotend then you can use one of the value sets by uncommenting it
 
   // Ultimaker
-  #define DEFAULT_Kp 22.2
-  #define DEFAULT_Ki 1.08
-  #define DEFAULT_Kd 114
+  //#define DEFAULT_Kp 22.2
+  //#define DEFAULT_Ki 1.08
+  //#define DEFAULT_Kd 114
 
   // MakerGear
   //#define DEFAULT_Kp 7.0
@@ -393,6 +445,16 @@
   //#define DEFAULT_Kp 63.0
   //#define DEFAULT_Ki 2.25
   //#define DEFAULT_Kd 440
+
+  // This set of coefficients acquired with JHead and 12V/40W heater (mrice)
+  //#define  DEFAULT_Kp 11.68
+  //#define  DEFAULT_Ki 0.66
+  //#define  DEFAULT_Kd 51.92
+
+  // This set of coefficients acquired with e3d-lite6 (mrice)
+  #define  DEFAULT_Kp 76
+  #define  DEFAULT_Ki 13
+  #define  DEFAULT_Kd 109
 
 #endif // PIDTEMP
 
@@ -413,7 +475,7 @@
  * heater. If your configuration is significantly different than this and you don't understand
  * the issues involved, don't use bed PID until someone else verifies that your hardware works.
  */
-//#define PIDTEMPBED
+#define PIDTEMPBED
 
 //#define BED_LIMIT_SWITCHING
 
@@ -431,9 +493,9 @@
 
   //120V 250W silicone heater into 4mm borosilicate (MendelMax 1.5+)
   //from FOPDT model - kp=.39 Tp=405 Tdead=66, Tc set to 79.2, aggressive factor of .15 (vs .1, 1, 10)
-  #define DEFAULT_bedKp 10.00
-  #define DEFAULT_bedKi .023
-  #define DEFAULT_bedKd 305.4
+  //#define DEFAULT_bedKp 10.00
+  //#define DEFAULT_bedKi .023
+  //#define DEFAULT_bedKd 305.4
 
   //120V 250W silicone heater into 4mm borosilicate (MendelMax 1.5+)
   //from pidautotune
@@ -442,6 +504,11 @@
   //#define DEFAULT_bedKd 1675.16
 
   // FIND YOUR OWN: "M303 E-1 C8 S90" to run autotune on the bed at 90 degreesC for 8 cycles.
+  
+  // Values for mk2a bed from autotune (mrice)
+  #define DEFAULT_bedKp 441.29
+  #define DEFAULT_bedKi 54.3
+  #define DEFAULT_bedKd 896.54
 #endif // PIDTEMPBED
 
 // @section extruder
@@ -532,8 +599,8 @@
 #define Y_MIN_ENDSTOP_INVERTING false // set to true to invert the logic of the endstop.
 #define Z_MIN_ENDSTOP_INVERTING false // set to true to invert the logic of the endstop.
 #define X_MAX_ENDSTOP_INVERTING false // set to true to invert the logic of the endstop.
-#define Y_MAX_ENDSTOP_INVERTING false // set to true to invert the logic of the endstop.
-#define Z_MAX_ENDSTOP_INVERTING false // set to true to invert the logic of the endstop.
+#define Y_MAX_ENDSTOP_INVERTING true // set to true to invert the logic of the endstop.
+#define Z_MAX_ENDSTOP_INVERTING true // set to true to invert the logic of the endstop.
 #define Z_MIN_PROBE_ENDSTOP_INVERTING false // set to true to invert the logic of the probe.
 
 /**
@@ -602,20 +669,36 @@
  * total number of extruders, the last value applies to the rest.
  */
 //#define DISTINCT_E_FACTORS
-
-/**
+ 
+/** 
+ * GT2 belts with 1/16th stepper driver are typically 80 steps/mm (20T pulley)
+ * MK7 drive gear with 1/16th stepper driver is about 105 steps/mm
+ * 8mm leadscrews with 1/16th stepper driver is normally 400 steps/mm
+ * 
  * Default Axis Steps Per Unit (steps/mm)
  * Override with M92
  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4]]]]
  */
-#define DEFAULT_AXIS_STEPS_PER_UNIT   { 80, 80, 4000, 500 }
+//#define DEFAULT_AXIS_STEPS_PER_UNIT   { 80, 80, 4000, 500 }
 
 /**
  * Default Max Feed Rate (mm/s)
  * Override with M203
  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4]]]]
  */
-#define DEFAULT_MAX_FEEDRATE          { 300, 300, 5, 25 }
+#define MK7_DEFAULT_STEPS 105
+#define MK8_DEFAULT_STEPS 150
+
+#if ENABLED(WILSON_TYPE)
+  #define DEFAULT_AXIS_STEPS_PER_UNIT   { 80, 80, 4000, 105 }
+  #define DEFAULT_MAX_FEEDRATE          { 100, 100, 3, 25 }
+#elif ENABLED(WILSON_II_TYPE)
+  #define DEFAULT_AXIS_STEPS_PER_UNIT   { 80, 80, 400, 102 }
+  #define DEFAULT_MAX_FEEDRATE          { 120, 120, 6, 25 }
+#else
+  #define DEFAULT_AXIS_STEPS_PER_UNIT   { 80, 80, 4000, 500 }
+  #define DEFAULT_MAX_FEEDRATE          { 300, 300, 5, 25 }
+#endif
 
 /**
  * Default Max Acceleration (change/s) change = mm/s
@@ -623,7 +706,7 @@
  * Override with M201
  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4]]]]
  */
-#define DEFAULT_MAX_ACCELERATION      { 3000, 3000, 100, 10000 }
+#define DEFAULT_MAX_ACCELERATION      { 1000, 1000, 100, 10000 }
 
 /**
  * Default Acceleration (change/s) change = mm/s
@@ -633,9 +716,9 @@
  *   M204 R    Retract Acceleration
  *   M204 T    Travel Acceleration
  */
-#define DEFAULT_ACCELERATION          3000    // X, Y, Z and E acceleration for printing moves
+#define DEFAULT_ACCELERATION          1000    // X, Y, Z and E acceleration for printing moves
 #define DEFAULT_RETRACT_ACCELERATION  3000    // E acceleration for retracts
-#define DEFAULT_TRAVEL_ACCELERATION   3000    // X, Y, Z acceleration for travel (non printing) moves
+#define DEFAULT_TRAVEL_ACCELERATION   1000    // X, Y, Z acceleration for travel (non printing) moves
 
 /**
  * Default Jerk (mm/s)
@@ -658,7 +741,7 @@
  *
  * See https://github.com/synthetos/TinyG/wiki/Jerk-Controlled-Motion-Explained
  */
-//#define S_CURVE_ACCELERATION
+#define S_CURVE_ACCELERATION
 
 //===========================================================================
 //============================= Z Probe Options =============================
@@ -776,12 +859,29 @@
  *      O-- FRONT --+
  *    (0,0)
  */
-#define X_PROBE_OFFSET_FROM_EXTRUDER 10  // X offset: -left  +right  [of the nozzle]
-#define Y_PROBE_OFFSET_FROM_EXTRUDER 10  // Y offset: -front +behind [the nozzle]
-#define Z_PROBE_OFFSET_FROM_EXTRUDER 0   // Z offset: -below +above  [the nozzle]
+// Enable if you have the Rack & Pinion style bed probe (i.e. Wilson II)
+//#define Z_RACK_PINION
+#if ENABLED(Z_RACK_PINION)
+  #define X_PROBE_OFFSET_FROM_EXTRUDER -7             // Probe on: -left  +right
+  #define Y_PROBE_OFFSET_FROM_EXTRUDER 45             // Probe on: -front +behind
+  #define Z_PROBE_OFFSET_FROM_EXTRUDER Z_PROBE_OFFSET // -below (always!)
+  #define Z_SAFE_HOMING                               // home with probe in middle of bed not on the edge
+#elif ENABLED(MJRICE_SERVO)
+  #define X_PROBE_OFFSET_FROM_EXTRUDER -54            // Probe on: -left  +right
+  #define Y_PROBE_OFFSET_FROM_EXTRUDER -7             // Probe on: -front +behind
+  #define Z_PROBE_OFFSET_FROM_EXTRUDER Z_PROBE_OFFSET // -below (always!) // mrice: for wilson ts [ jhead use -18 for e3dlite use -7.7 ]
+#else
+  #define X_PROBE_OFFSET_FROM_EXTRUDER 10             // X offset: -left  +right  [of the nozzle]
+  #define Y_PROBE_OFFSET_FROM_EXTRUDER 10             // Y offset: -front +behind [the nozzle]
+  #define Z_PROBE_OFFSET_FROM_EXTRUDER 0              // Z offset: -below +above  [the nozzle]
+#endif
 
 // Certain types of probes need to stay away from edges
-#define MIN_PROBE_EDGE 10
+#if ENABLED(Z_RACK_PINION)
+  #define MIN_PROBE_EDGE 20
+#else
+  #define MIN_PROBE_EDGE 10
+#endif
 
 // X and Y axis travel speed (mm/m) between probes
 #define XY_PROBE_SPEED 8000
@@ -811,7 +911,7 @@
  * Example: `M851 Z-5` with a CLEARANCE of 4  =>  9mm from bed to nozzle.
  *     But: `M851 Z+1` with a CLEARANCE of 2  =>  2mm from bed to nozzle.
  */
-#define Z_CLEARANCE_DEPLOY_PROBE   10 // Z Clearance for Deploy/Stow
+#define Z_CLEARANCE_DEPLOY_PROBE   30 // Z Clearance for Deploy/Stow
 #define Z_CLEARANCE_BETWEEN_PROBES  5 // Z Clearance between probe points
 #define Z_CLEARANCE_MULTI_PROBE     5 // Z Clearance between multiple probes
 //#define Z_AFTER_PROBING           5 // Z position after probing is done
@@ -849,13 +949,13 @@
 
 // Invert the stepper direction. Change (or reverse the motor connector) if an axis goes the wrong way.
 #define INVERT_X_DIR false
-#define INVERT_Y_DIR true
-#define INVERT_Z_DIR false
+#define INVERT_Y_DIR false
+#define INVERT_Z_DIR true
 
 // @section extruder
 
 // For direct drive extruder v9 set to true, for geared extruder set to false.
-#define INVERT_E0_DIR false
+#define INVERT_E0_DIR true
 #define INVERT_E1_DIR false
 #define INVERT_E2_DIR false
 #define INVERT_E3_DIR false
@@ -867,7 +967,7 @@
 
 //#define UNKNOWN_Z_NO_RAISE // Don't raise Z (lower the bed) if Z is "unknown." For beds that fall when Z is powered off.
 
-//#define Z_HOMING_HEIGHT 4  // (in mm) Minimal z height before homing (G28) for Z clearance above the bed, clamps, ...
+#define Z_HOMING_HEIGHT 15  // (in mm) Minimal z height before homing (G28) for Z clearance above the bed, clamps, ...
                              // Be sure you have this distance over your Z_MAX_POS in case.
 
 // Direction of endstops when homing; 1=MAX, -1=MIN
@@ -880,7 +980,7 @@
 
 // The size of the print bed
 #define X_BED_SIZE 200
-#define Y_BED_SIZE 200
+#define Y_BED_SIZE 300
 
 // Travel limits (mm) after homing, corresponding to endstop positions.
 #define X_MIN_POS 0
@@ -1256,11 +1356,11 @@
 
 // Preheat Constants
 #define PREHEAT_1_TEMP_HOTEND 180
-#define PREHEAT_1_TEMP_BED     70
+#define PREHEAT_1_TEMP_BED     55
 #define PREHEAT_1_FAN_SPEED     0 // Value from 0 to 255
 
-#define PREHEAT_2_TEMP_HOTEND 240
-#define PREHEAT_2_TEMP_BED    110
+#define PREHEAT_2_TEMP_HOTEND 210
+#define PREHEAT_2_TEMP_BED    100
 #define PREHEAT_2_FAN_SPEED     0 // Value from 0 to 255
 
 /**
@@ -1460,13 +1560,13 @@
 // This option overrides the default number of encoder pulses needed to
 // produce one step. Should be increased for high-resolution encoders.
 //
-//#define ENCODER_PULSES_PER_STEP 4
+#define ENCODER_PULSES_PER_STEP 4
 
 //
 // Use this option to override the number of step signals required to
 // move between next/prev menu items.
 //
-//#define ENCODER_STEPS_PER_MENU_ITEM 1
+#define ENCODER_STEPS_PER_MENU_ITEM 1
 
 /**
  * Encoder Direction Options
@@ -1491,7 +1591,7 @@
 //  If CLOCKWISE normally moves DOWN this makes it go UP.
 //  If CLOCKWISE normally moves UP this makes it go DOWN.
 //
-//#define REVERSE_MENU_DIRECTION
+#define REVERSE_MENU_DIRECTION
 
 //
 // Individual Axis Homing
