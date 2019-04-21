@@ -2204,7 +2204,11 @@ void clean_up_after_endstop_or_probe_move() {
         #elif ENABLED(Z_PROBE_ALLEN_KEY)
 
           deploy ? run_deploy_moves_script() : run_stow_moves_script();
-
+        
+        #elif ENABLED(Z_RACK_PINION)
+        
+          do_blocking_move_to_x(deploy ? 0 : X_MAX_POS);
+          
         #endif
 
     #ifdef _TRIGGERED_WHEN_STOWED_TEST
